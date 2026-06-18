@@ -60,22 +60,6 @@ jobs:
   functional-tests:
     needs:
       - metadata
-    strategy:
-      fail-fast: false
-      matrix:
-        release: ${{ inputs.release && fromJson(inputs.release) || fromJson(needs.metadata.outputs.releases) }}
-        proposed:
-          - ""
-          - proposed
-        ppa:
-          - ""
-          - "${{ inputs.ppa || 'ppa:ubuntu-security-proposed/ppa' }}"
-        ceph:
-          - ""
-          - ceph
-        exclude:
-          - proposed: proposed
-            ppa: "${{ inputs.ppa || 'ppa:ubuntu-security-proposed/ppa' }}"
     env:
       TEMPEST_CHANNEL: "${{ inputs.tempest_channel }}"
       TEMPEST_SOURCE: "${{ inputs.tempest_source }}"
@@ -124,29 +108,12 @@ jobs:
         free -h
         df -h
 
-        PROPOSED="${{ matrix.proposed }}"
-        artifact_name=ubuntu-${{ matrix.release }}
-        if [ -n "${{ matrix.ppa }}" ]; then
-          artifact_name+=-ppa
-          # Force proposed pocket if the PPA needs it
-          if [ "${{ inputs.ppa_needs_proposed }}" = "true" ]; then
-            PROPOSED="proposed"
-          fi
-        fi
-        if [ -n "$PROPOSED" ]; then
-          artifact_name+=-proposed
-        fi
-        if [ -n "${{ matrix.ceph }}" ]; then
-          artifact_name+=-ceph
-        fi
-        echo "artifact_name=${artifact_name}" >> $GITHUB_OUTPUT
+        echo "artifact_name=functional-tests" >> $GITHUB_OUTPUT
 
-        export RELEASES="${{ matrix.release }}"
-        APT_POCKETS="$PROPOSED"
-        export APT_POCKETS=${APT_POCKETS:-false}
-        APT_PPAS="${{ matrix.ppa }}"
+        export RELEASES="$(jq -r '.[]' <<< '${{ inputs.release && inputs.release || needs.metadata.outputs.releases }}')"
+        export APT_POCKETS="false proposed"
+        export APT_PPAS="false ${{ inputs.ppa || 'ppa:ubuntu-security-proposed/ppa' }}"
         export APT_PPAS=${APT_PPAS:-false}
-        export FEATURE_ENABLE_CEPH="${{ matrix.ceph }}"
         # Running in a VM with 16 cores and 64GiB of memory, leaving 2 cores and
         # 8GiB of ram to the host. The VM launched by spread will be L2 guest,
         # hence the need to assign a lot of resources.

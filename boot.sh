@@ -10,24 +10,34 @@ RELEASES=${RELEASES:-$(curl -s https://api.launchpad.net/devel/ubuntu/series | \
                                 .status == "Pre-release Freeze")) | .name')}
 PROPOSED=${APT_POCKETS:-"false true"}
 PPA=${APT_PPAS:-"false ppa:ubuntu-security-proposed/ppa"}
+CEPH=${FEATURE_ENABLE_CEPH_VALUES:-"false ceph"}
 for codename in $RELEASES; do
     for proposed in $PROPOSED; do
         for ppa in $PPA; do
-            name=ubuntu-$codename
-            if [ "$proposed" != false ]; then
-                name+=-proposed
-            fi
-            if [ "$ppa" != false ]; then
-                name+=-ppa
-            fi
+            for ceph in $CEPH; do
+                if [ "$proposed" != false ] && [ "$ppa" != false ]; then
+                    continue
+                fi
 
-            cat << EOSYSTEM >> systems.$$
-      - ${name}:
-          image: ubuntu-daily:${codename}
-          environment:
-            APT_ENABLE_PROPOSED: ${proposed}
-            APT_ENABLE_PPA: ${ppa}
+                name=ubuntu-$codename
+                if [ "$proposed" != false ]; then
+                    name+=-proposed
+                fi
+                if [ "$ppa" != false ]; then
+                    name+=-ppa
+                fi
+                if [ "$ceph" != false ]; then
+                    name+=-ceph
+                fi
+
+                cat << EOSYSTEM >> systems.$$
+        - ${name}:
+            image: ubuntu-daily:${codename}
+            environment:
+                APT_ENABLE_PROPOSED: ${proposed}
+                APT_ENABLE_PPA: ${ppa}
 EOSYSTEM
+            done
         done
     done
 done

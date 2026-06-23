@@ -65,63 +65,63 @@ jobs:
       TEMPEST_SOURCE: "${{ inputs.tempest_source }}"
       TEST_EXCLUDE_REGEXES: "${{ inputs.test_exclude_regexes }}"
       TEST_INCLUDE_REGEXES: "${{ inputs.test_include_regexes }}"
-    runs-on: [self-hosted, linux, X64, xlarge, noble]
+
+    # This runner is only for submitting the job to Testflinger
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
       with:
         submodules: true
 
-    - name: Install dependencies
-      run: |
-        set -euxo pipefail
-        sudo apt-get update
-        sudo apt-get install -yq snapd
-        sudo systemctl enable snapd
-        sudo systemctl restart snapd
-        sudo snap refresh --channel 5.21/stable lxd \
-            || sudo snap install --channel 5.21/stable lxd
-        sudo snap install --channel 1.24/stable --classic go
-        cd spread
-        go install ./...
+    - name: Set Up Testflinger
+      uses: canonical/testflinger/.github/actions/testflinger-setup@main
 
-    - name: Clear FORWARD firewall rules
-      run: |
-        set -euxo pipefail
-        # Docker can inject rules causing firewall conflicts
-        sudo iptables -P FORWARD ACCEPT  || true
-        sudo ip6tables -P FORWARD ACCEPT || true
-        sudo iptables -F FORWARD  || true
-        sudo ip6tables -F FORWARD || true
+    - name: Submit Testflinger Job
+      id: submit
+      uses: canonical/testflinger/.github/actions/submit@main
+      with:
+        poll: true
+        job: |
+          # Install dependencies
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -yq snapd
+          sudo systemctl enable snapd
+          sudo systemctl restart snapd
+          sudo snap refresh --channel 5.21/stable lxd \
+              || sudo snap install --channel 5.21/stable lxd
+          sudo snap install --channel 1.24/stable --classic go
+          cd spread
+          go install ./...
 
-    - name: Configure LXD
-      run: |
-        set -euxo pipefail
-        sudo snap set lxd daemon.group=adm
-        sudo lxd init --auto
+          # Clear FORWARD firewall rules
+          # Docker can inject rules causing firewall conflicts
+          sudo iptables -P FORWARD ACCEPT  || true
+          sudo ip6tables -P FORWARD ACCEPT || true
+          sudo iptables -F FORWARD  || true
+          sudo ip6tables -F FORWARD || true
 
-    - name: Spread
-      id: spread
-      run: |
-        set -euxo pipefail
-        nproc
-        free -h
-        df -h
+          # Configure LXD
+          set -euxo pipefail
+          sudo snap set lxd daemon.group=adm
+          sudo lxd init --auto
 
-        echo "artifact_name=functional-tests" >> $GITHUB_OUTPUT
+          # Submit Spread Job
+          set -euxo pipefail
+          nproc
+          free -h
+          df -h
 
-        export RELEASES="$(jq -r '.[]' <<< '${{ inputs.release && inputs.release || needs.metadata.outputs.releases }}')"
-        export APT_POCKETS="false proposed"
-        export APT_PPAS="false ${{ inputs.ppa || 'ppa:ubuntu-security-proposed/ppa' }}"
-        export APT_PPAS=${APT_PPAS:-false}
-        # Running in a VM with 16 cores and 64GiB of memory, leaving 2 cores and
-        # 8GiB of ram to the host. The VM launched by spread will be L2 guest,
-        # hence the need to assign a lot of resources.
-        PLAN=c14-m56 ./boot.sh
+          export RELEASES="$(jq -r '.[]' <<< '${{ inputs.release && inputs.release || needs.metadata.outputs.releases }}')"
+          export APT_POCKETS="false proposed"
+          export APT_PPAS="false ${{ inputs.ppa || 'ppa:ubuntu-security-proposed/ppa' }}"
+          export APT_PPAS=${APT_PPAS:-false}
+          ./boot.sh
 
-        mkdir /tmp/artifacts
-        cp spread.yaml /tmp/artifacts/
-        $HOME/go/bin/spread -reuse -artifacts /tmp/artifacts
+          mkdir /tmp/artifacts
+          cp spread.yaml /tmp/artifacts/
+          $HOME/go/bin/spread -reuse -artifacts /tmp/artifacts
 
     - name: Sanitize artifacts
       if: always()
@@ -139,5 +139,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ steps.spread.outputs.artifact_name }}
+        name: functional-tests
         path: /tmp/artifacts/

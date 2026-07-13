@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 DEPENDENCIES = {
     mysql,
 }
-PACKAGES = ["keystone", "apache2", "libapache2-mod-wsgi-py3"]
+PACKAGES = ["keystone", "apache2", "libapache2-mod-wsgi-py3", "memcached"]
 LOGS = ["/var/log/keystone/"]
 
 CONF = "/etc/keystone/keystone.conf"
@@ -80,7 +80,7 @@ def setup():
     module_utils.cfg_set(
         CONF,
         ("cache", "enabled", "true"),
-        ("cache", "backend", "dogpile.cache.memory"),
+        ("cache", "backend", "dogpile.cache.memcached"),
         ("cache", "expiration_time", "600"),
     )
     LOG.debug("Running keystone-manage db_sync...")

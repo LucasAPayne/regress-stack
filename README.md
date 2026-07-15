@@ -9,7 +9,7 @@ To get started with Regress Stack, follow these simple steps:
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/canonical/regress-stack.git
+   git clone --recursive https://github.com/canonical/regress-stack.git
    cd regress-stack
    ```
 
@@ -22,7 +22,9 @@ To get started with Regress Stack, follow these simple steps:
 3. **Install Dependencies**:
 
    ```bash
+   sudo apt update
    sudo apt install dpkg-dev python3-dev python-apt-dev
+   sudo apt install $(uv run regress-stack packages)
    uv sync
    ```
 
@@ -35,8 +37,8 @@ To get started with Regress Stack, follow these simple steps:
 5. **Run the Regress Stack**:
 
    ```bash
-   uv run regress-stack setup
-   uv run regress-stack test
+   sudo uv run regress-stack setup
+   sudo uv run regress-stack test
    ```
 
 Regress Stack currently supports the following OpenStack modules:

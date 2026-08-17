@@ -53,6 +53,7 @@ Regress Stack currently supports the following OpenStack modules:
 - **Nova**: `nova-api`, `nova-conductor`, `nova-scheduler`, `nova-compute`, `nova-spiceproxy`, `spice-html5`
 - **OVN**: `ovn-central`, `openvswitch-switch`, `ovn-host`
 - **Placement**: `placement-api`
+- **Watcher**: `watcher-api`, `watcher-decision-engine`, `watcher-applier`
 
 The following modules are available on [Sunbeam](https://github.com/canonical/snap-openstack) but are not currently supported by Regress Stack:
 
@@ -60,7 +61,6 @@ The following modules are available on [Sunbeam](https://github.com/canonical/sn
 - **Ironic**
 - **Masakari**
 - **Octavia**
-- **Watcher**
 - **Manila**
 - **Barbican**
 - **AODH**

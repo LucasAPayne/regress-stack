@@ -26,9 +26,14 @@ BARBICAN_ROLES = [
     "admin",
     "creator",
     "key-manager:service-admin",
+    "member",
+    "reader",
 ]
 
-TEST_INCLUDE_REGEXES = ["barbican_tempest_plugin.tests.api"]
+TEST_INCLUDE_REGEXES = [
+    "barbican_tempest_plugin.tests.api",
+    "barbican_tempest_plugin.tests.rbac",
+]
 TEST_EXCLUDE_REGEXES = []
 
 
@@ -53,6 +58,8 @@ def setup():
             "service_auth", keystone.account_dict(username, password)
         ),
         ("DEFAULT", "transport_url", rabbitmq.transport_url(rabbit_user, rabbit_pass)),
+        ("oslo_policy", "enforce_scope", "true"),
+        ("oslo_policy", "enforce_new_defaults", "true"),
     )
     core_utils.sudo("barbican-manage", ["db", "upgrade"], user=SERVICE)
     core_utils.restart_service("barbican-keystone-listener", "barbican-worker")
@@ -64,6 +71,7 @@ def configure_tempest(tempest_conf: pathlib.Path):
     module_utils.cfg_set(
         conf,
         ("service_available", "barbican", "True"),
+        ("enforce_scope", "barbican", "True"),
         *module_utils.dict_to_cfg_set_args(
             "key_manager",
             {

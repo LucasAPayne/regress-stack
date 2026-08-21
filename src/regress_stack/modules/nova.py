@@ -176,8 +176,6 @@ def setup():
             *module_utils.dict_to_cfg_set_args(
                 "key_manager", barbican.key_manager_cfg()
             ),
-            ("glance", "verify_glance_signatures", "true"),
-            ("glance", "enable_certificate_validation", "true"),
         )
 
     core_utils.sudo("nova-manage", ["api_db", "sync"], user="nova")

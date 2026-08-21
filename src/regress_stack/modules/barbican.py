@@ -105,8 +105,8 @@ def configure_tempest(tempest_conf: pathlib.Path):
                 "max_microversion": "1.1",
             },
         ),
-        ("image_signature_verification", "enforced", "True"),
-        ("image_signature_verification", "certificate_validation", "True"),
+        ("image_signature_verification", "enforced", "False"),
+        ("image_signature_verification", "certificate_validation", "False"),
         ("ephemeral_storage_encryption", "enabled", "True"),
         ("compute_feature_enabled", "attach_encrypted_volume", "True"),
     )

@@ -51,6 +51,7 @@ prepare: |
   fi
   if [ "${TEMPEST_SOURCE:-apt}" = apt ]; then
     PACKAGES+="
+      barbican-tempest-plugin \
       heat-tempest-plugin \
       python3-tempestconf \
       tempest"

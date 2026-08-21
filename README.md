@@ -47,6 +47,7 @@ Regress Stack currently supports the following OpenStack modules:
 - **Cinder**: `cinder-api`, `cinder-scheduler`, `cinder-volume`
 - **Glance**: `glance-api`
 - **Heat**: `heat-api`, `heat-api-cfn`, `heat-engine`
+- **Barbican**: `barbican-api`, `barbican-keystone-listener`, `barbican-worker`
 - **Keystone**: `keystone`, `apache2`, `libapache2-mod-wsgi-py3`
 - **Magnum**: `magnum-api`, `magnum-conductor`
 - **Neutron**: `neutron-server`, `neutron-ovn-metadata-agent`
@@ -62,7 +63,6 @@ The following modules are available on [Sunbeam](https://github.com/canonical/sn
 - **Octavia**
 - **Watcher**
 - **Manila**
-- **Barbican**
 - **AODH**
 - **Ceilometer**
 - **Gnocchi**

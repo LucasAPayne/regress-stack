@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+import pathlib
 
 from regress_stack.core import utils as core_utils
 from regress_stack.modules import keystone, mysql, rabbitmq
@@ -24,7 +25,11 @@ SERVICE_TYPE = "key-manager"
 BARBICAN_ROLES = [
     "admin",
     "creator",
+    "key-manager:service-admin",
 ]
+
+TEST_INCLUDE_REGEXES = ["barbican_tempest_plugin.tests.api"]
+TEST_EXCLUDE_REGEXES = []
 
 
 def setup():
@@ -51,3 +56,18 @@ def setup():
     )
     core_utils.sudo("barbican-manage", ["db", "upgrade"], user=SERVICE)
     core_utils.restart_service("barbican-keystone-listener", "barbican-worker")
+
+
+def configure_tempest(tempest_conf: pathlib.Path):
+    """Configure tempest for barbican."""
+    conf = str(tempest_conf)
+    module_utils.cfg_set(
+        conf,
+        ("service_available", "barbican", "True"),
+        *module_utils.dict_to_cfg_set_args(
+            "key_manager",
+            {
+                "region": module_utils.REGION,
+            },
+        ),
+    )

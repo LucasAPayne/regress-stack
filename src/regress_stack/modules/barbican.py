@@ -3,7 +3,9 @@
 
 import logging
 import pathlib
+import typing
 
+from regress_stack.core import apt as core_apt
 from regress_stack.core import utils as core_utils
 from regress_stack.modules import keystone, mysql, rabbitmq
 from regress_stack.modules import utils as module_utils
@@ -33,6 +35,7 @@ BARBICAN_ROLES = [
 TEST_INCLUDE_REGEXES = [
     "barbican_tempest_plugin.tests.api",
     "barbican_tempest_plugin.tests.rbac",
+    "barbican_tempest_plugin.tests.scenario",
 ]
 TEST_EXCLUDE_REGEXES = []
 
@@ -65,6 +68,17 @@ def setup():
     core_utils.restart_service("barbican-keystone-listener", "barbican-worker")
 
 
+def installed() -> bool:
+    return core_apt.pkgs_installed(PACKAGES)
+
+
+def key_manager_cfg() -> typing.Dict[str, str]:
+    username, password = keystone.ensure_service_account(SERVICE, SERVICE_TYPE, URL)
+    cfg = keystone.account_dict(username, password)
+    cfg["backend"] = "barbican"
+    return cfg
+
+
 def configure_tempest(tempest_conf: pathlib.Path):
     """Configure tempest for barbican."""
     conf = str(tempest_conf)
@@ -76,6 +90,11 @@ def configure_tempest(tempest_conf: pathlib.Path):
             "key_manager",
             {
                 "region": module_utils.REGION,
+                "max_microversion": "1.1",
             },
         ),
+        ("image_signature_verification", "enforced", "True"),
+        ("image_signature_verification", "certificate_validation", "True"),
+        ("ephemeral_storage_encryption", "enabled", "True"),
+        ("compute_feature_enabled", "attach_encrypted_volume", "True"),
     )

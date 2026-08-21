@@ -7,10 +7,11 @@ import subprocess
 
 from regress_stack.core import apt as core_apt
 from regress_stack.core import utils as core_utils
-from regress_stack.modules import ceph, keystone, mysql, rabbitmq
+from regress_stack.modules import barbican, ceph, keystone, mysql, rabbitmq
 from regress_stack.modules import utils as module_utils
 
 DEPENDENCIES = {ceph, keystone, mysql, rabbitmq}
+OPTIONAL_DEPENDENCIES = {barbican}
 PACKAGES = ["cinder-api", "cinder-scheduler", "cinder-volume"]
 LOGS = ["/var/log/cinder/"]
 
@@ -105,6 +106,14 @@ def setup():
         ),
     )
     _ensure_questing_compat()
+    if barbican.installed():
+        module_utils.cfg_set(
+            CONF,
+            ("key_manager", "backend", "barbican"),
+            *module_utils.dict_to_cfg_set_args(
+                "key_manager", barbican.key_manager_cfg()
+            ),
+        )
     core_utils.sudo("cinder-manage", ["db", "sync"], SERVICE)
     core_utils.restart_apache()
     core_utils.restart_service("cinder-scheduler")

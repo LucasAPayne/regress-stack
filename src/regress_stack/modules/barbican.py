@@ -48,6 +48,14 @@ def setup():
         keystone.ensure_role(role)
     module_utils.cfg_set(
         CONF,
+        # Barbican on Jammy (Yoga) reads the DB connection from
+        # [DEFAULT].sql_connection, while Noble (Caracal) and newer
+        # read from [database].connection. Set both for compatibility.
+        (
+            "DEFAULT",
+            "sql_connection",
+            mysql.connection_string(SERVICE, db_user, db_pass),
+        ),
         (
             "database",
             "connection",

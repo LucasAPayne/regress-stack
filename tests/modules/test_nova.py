@@ -70,7 +70,9 @@ def test_ensure_metadata_site_when_missing(tmp_path, monkeypatch):
     nova._ensure_metadata_site()
 
     assert site_path.exists()
-    assert "/usr/bin/nova-metadata-wsgi" in site_path.read_text()
+    assert (
+        "/usr/lib/python3/dist-packages/nova/wsgi/metadata.py" in site_path.read_text()
+    )
     assert "WSGIDaemonProcess nova-metadata" in site_path.read_text()
     assert ("a2ensite", [site_path.name]) in run_calls
     assert warnings
@@ -84,7 +86,7 @@ def test_ensure_metadata_site_is_noop_when_valid_site_exists(tmp_path, monkeypat
     site_path = sites_available / "regress-stack-nova-metadata.conf"
     (sites_enabled / "nova-metadata.conf").write_text(
         "Listen 8775\n"
-        "WSGIScriptAlias / /usr/bin/nova-metadata-wsgi\n"
+        "WSGIScriptAlias / /usr/lib/python3/dist-packages/nova/wsgi/metadata.py\n"
         "WSGIDaemonProcess nova-metadata processes=1 threads=1 user=nova group=nova display-name=%{GROUP}\n"
         "WSGIProcessGroup nova-metadata\n"
     )
@@ -112,7 +114,7 @@ def test_ensure_metadata_site_rewrites_stale_managed_site(tmp_path, monkeypatch)
     site_path = sites_available / "regress-stack-nova-metadata.conf"
     site_path.write_text(
         "Listen 8775\n"
-        "WSGIScriptAlias / /usr/bin/nova-metadata-wsgi\n"
+        "WSGIScriptAlias / /usr/lib/python3/dist-packages/nova/wsgi/metadata.py\n"
         "WSGIDaemonProcess nova-api processes=5 threads=1 user=nova group=nova display-name=%{GROUP}\n"
         "WSGIProcessGroup nova-api\n"
     )

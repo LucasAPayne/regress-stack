@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PLAN=${PLAN:-c4-m8}
+PLAN=${PLAN:-c4-m10}
 STORAGE=${STORAGE:-30G}
 RELEASES=${RELEASES:-$(curl -s https://api.launchpad.net/devel/ubuntu/series | \
         jq -r '.entries[] | select(.version >= "22.04" and

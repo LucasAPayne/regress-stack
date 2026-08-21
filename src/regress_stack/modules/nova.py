@@ -267,7 +267,7 @@ def _site_has_metadata(site_path: pathlib.Path) -> bool:
         marker in content
         for marker in (
             "Listen 8775",
-            "/usr/bin/nova-metadata-wsgi",
+            "/usr/lib/python3/dist-packages/nova/wsgi/metadata.py",
             f"WSGIDaemonProcess {NOVA_METADATA_PROCESS_GROUP}",
             f"WSGIProcessGroup {NOVA_METADATA_PROCESS_GROUP}",
         )

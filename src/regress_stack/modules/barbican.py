@@ -64,7 +64,11 @@ def setup():
         ("oslo_policy", "enforce_scope", "true"),
         ("oslo_policy", "enforce_new_defaults", "true"),
     )
-    core_utils.sudo("barbican-manage", ["db", "upgrade"], user=SERVICE)
+    core_utils.sudo(
+        "barbican-manage",
+        ["--config-file", CONF, "db", "upgrade"],
+        user=SERVICE,
+    )
     core_utils.restart_service("barbican-keystone-listener", "barbican-worker")
 
 

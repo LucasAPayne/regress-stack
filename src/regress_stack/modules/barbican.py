@@ -31,6 +31,10 @@ BARBICAN_ROLES = [
     "member",
     "reader",
 ]
+# Fernet key for the simple_crypto plugin (base64url-encoded 32 bytes).
+# Required for secret storage; without it barbican returns 500 on any
+# secret with a payload.
+SIMPLE_CRYPTO_KEK = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXowMTIzNDU="
 
 TEST_INCLUDE_REGEXES = [
     "barbican_tempest_plugin.tests.api",
@@ -71,6 +75,7 @@ def setup():
         ("DEFAULT", "transport_url", rabbitmq.transport_url(rabbit_user, rabbit_pass)),
         ("oslo_policy", "enforce_scope", "true"),
         ("oslo_policy", "enforce_new_defaults", "true"),
+        ("simple_crypto_plugin", "kek", SIMPLE_CRYPTO_KEK),
     )
     core_utils.sudo(
         "barbican-manage",

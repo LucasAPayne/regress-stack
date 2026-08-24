@@ -5,10 +5,11 @@ import pathlib
 
 from regress_stack.core import apt as core_apt
 from regress_stack.core import utils as core_utils
-from regress_stack.modules import keystone, mysql
+from regress_stack.modules import barbican, keystone, mysql
 from regress_stack.modules import utils as module_utils
 
 DEPENDENCIES = {keystone, mysql}
+OPTIONAL_DEPENDENCIES = {barbican}
 PACKAGES = ["glance-api"]
 LOGS = ["/var/log/glance/"]
 
@@ -54,6 +55,14 @@ def setup():
         ("fs", "filesystem_store_datadir", "/var/lib/glance/images/"),
     )
     _disable_strict_image_format_validation()
+    if barbican.installed():
+        module_utils.cfg_set(
+            CONF,
+            ("key_manager", "backend", "barbican"),
+            *module_utils.dict_to_cfg_set_args(
+                "key_manager", barbican.key_manager_cfg()
+            ),
+        )
     core_utils.sudo("glance-manage", ["db_sync"], user=SERVICE)
     core_utils.restart_service("glance-api")
 

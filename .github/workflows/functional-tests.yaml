@@ -152,7 +152,7 @@ jobs:
         # Running in a VM with 16 cores and 64GiB of memory, leaving 2 cores and
         # 8GiB of ram to the host. The VM launched by spread will be L2 guest,
         # hence the need to assign a lot of resources.
-        PLAN=c14-m56 ./boot.sh
+        STORAGE=50G PLAN=c14-m56 ./boot.sh
 
         mkdir /tmp/artifacts
         cp spread.yaml /tmp/artifacts/

@@ -11,6 +11,7 @@ import multiprocessing
 import os
 import pathlib
 import platform
+import re
 import socket
 import subprocess
 import time
@@ -219,6 +220,21 @@ def release() -> str:
     except Exception:
         LOG.exception("Failed to get release name")
         return "noble"
+
+
+def tempest_version() -> typing.Optional[tuple]:
+    """Return tempest version as (major, minor, patch) tuple, or None."""
+    try:
+        return _parse_tempest_version(run("tempest", ["--version"]))
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+
+def _parse_tempest_version(output: str) -> typing.Optional[tuple]:
+    match = re.search(r"\b(\d+)\.(\d+)(?:\.(\d+))?\b", output)
+    if match is None:
+        return None
+    return (int(match.group(1)), int(match.group(2)), int(match.group(3) or 0))
 
 
 def mark_setup(name: str):

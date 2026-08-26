@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import pathlib
-import re
 import subprocess
 
 from regress_stack.core import apt as core_apt
@@ -31,24 +30,10 @@ _TEMPEST_SERVICE_TYPE_VERSION = (42, 0, 0)
 
 
 def get_service_type():
-    version = _tempest_version()
+    version = core_utils.tempest_version()
     if version is not None and version >= _TEMPEST_SERVICE_TYPE_VERSION:
         return _SERVICE_TYPE
     return _LEGACY_SERVICE_TYPE
-
-
-def _tempest_version():
-    try:
-        return _parse_tempest_version(core_utils.run("tempest", ["--version"]))
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return None
-
-
-def _parse_tempest_version(output: str):
-    match = re.search(r"\b(\d+)\.(\d+)(?:\.(\d+))?\b", output)
-    if match is None:
-        return None
-    return (int(match.group(1)), int(match.group(2)), int(match.group(3) or 0))
 
 
 def installed() -> bool:

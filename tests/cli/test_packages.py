@@ -98,3 +98,31 @@ def test_packages_command_no_tempest():
     output_packages = result.output.strip().split()
     assert "python3-tempestconf" in output_packages
     assert "tempest" not in output_packages
+
+
+def test_packages_command_watcher():
+    runner = CliRunner()
+    result = runner.invoke(packages, ["watcher"])
+    assert result.exit_code == 0
+
+    output_packages = result.output.strip().split()
+    assert "watcher-api" in output_packages
+    assert "watcher-decision-engine" in output_packages
+    assert "watcher-applier" in output_packages
+    assert "python3-watcherclient" in output_packages
+    assert "watcher-tempest-plugin" in output_packages
+    assert "nova-compute" in output_packages
+    assert "keystone" in output_packages
+    assert "mysql-server" in output_packages
+    assert "rabbitmq-server" in output_packages
+
+
+def test_packages_command_watcher_without_tempest():
+    runner = CliRunner()
+    result = runner.invoke(packages, ["--no-tempest", "watcher"])
+    assert result.exit_code == 0
+
+    output_packages = result.output.strip().split()
+    assert "watcher-api" in output_packages
+    assert "python3-watcherclient" in output_packages
+    assert "watcher-tempest-plugin" not in output_packages

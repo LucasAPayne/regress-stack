@@ -12,6 +12,7 @@ import time
 from regress_stack.core import apt as core_apt
 from regress_stack.core import utils as core_utils
 from regress_stack.modules import (
+    barbican,
     ceph,
     cinder,
     glance,
@@ -34,7 +35,7 @@ DEPENDENCIES = {
     rabbitmq,
     placement,
 }
-OPTIONAL_DEPENDENCIES = {ceph, cinder}
+OPTIONAL_DEPENDENCIES = {barbican, ceph, cinder}
 BASE_PACKAGES = [
     "nova-api",
     "nova-conductor",
@@ -165,6 +166,15 @@ def setup():
                     "region_name": utils.REGION,
                     "volume_api_version": "3",
                 },
+            ),
+        )
+
+    if barbican.installed():
+        module_utils.cfg_set(
+            CONF,
+            ("key_manager", "backend", "barbican"),
+            *module_utils.dict_to_cfg_set_args(
+                "key_manager", barbican.key_manager_cfg()
             ),
         )
 

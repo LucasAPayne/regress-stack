@@ -115,6 +115,17 @@ def test(concurrency, retry_failed):
         )
     )
 
+    # When tempest >= 26.0.0 and barbican-tempest-plugin < 4.0.0, a
+    # sitecustomize.py is written to the workspace root to register the
+    # now-removed CONF.scenario.img_dir option. Add the workspace to
+    # PYTHONPATH so Python's site module can find it when stestr workers
+    # and tempest subprocesses start up.
+    sitecustomize = pathlib.Path(dir_name) / "sitecustomize.py"
+    if sitecustomize.exists():
+        existing = env.get("PYTHONPATH", "")
+        workspace = str(pathlib.Path(dir_name).resolve())
+        env["PYTHONPATH"] = f"{workspace}:{existing}" if existing else workspace
+
     LOG.info("Building test list")
     global_include_regex = ["smoke"]
     global_exclude_regex = [

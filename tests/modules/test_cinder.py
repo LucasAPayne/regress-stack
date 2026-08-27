@@ -44,10 +44,6 @@ def test_get_service_type_legacy_on_unparseable_version(monkeypatch):
     assert cinder.get_service_type() == cinder._LEGACY_SERVICE_TYPE
 
 
-def test_parse_tempest_version_accepts_missing_patch_version():
-    assert cinder._parse_tempest_version("tempest 42.1\n") == (42, 1, 0)
-
-
 def test_using_sudo_rs(monkeypatch):
     monkeypatch.setattr(
         cinder.subprocess,

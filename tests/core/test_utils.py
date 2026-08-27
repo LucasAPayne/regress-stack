@@ -1,5 +1,6 @@
 # Copyright 2025 - Canonical Ltd
 # SPDX-License-Identifier: GPL-3.0-only
+import subprocess
 import unittest.mock as mock
 
 import pytest
@@ -56,3 +57,48 @@ def test_system(mock_os):
         ]
     )
     mock_os.reset()
+
+
+def test_tempest_version_parses_full(monkeypatch):
+    monkeypatch.setattr(
+        regress_stack.core.utils, "run", lambda *_args, **_kwargs: "tempest 44.0.0\n"
+    )
+    assert regress_stack.core.utils.tempest_version() == (44, 0, 0)
+
+
+def test_tempest_version_parses_missing_patch(monkeypatch):
+    monkeypatch.setattr(
+        regress_stack.core.utils, "run", lambda *_args, **_kwargs: "tempest 42.1\n"
+    )
+    assert regress_stack.core.utils.tempest_version() == (42, 1, 0)
+
+
+def test_tempest_version_file_not_found(monkeypatch):
+    def raise_file_not_found(*_args, **_kwargs):
+        raise FileNotFoundError
+
+    monkeypatch.setattr(regress_stack.core.utils, "run", raise_file_not_found)
+    assert regress_stack.core.utils.tempest_version() is None
+
+
+def test_tempest_version_called_process_error(monkeypatch):
+    def raise_called_process_error(*_args, **_kwargs):
+        raise subprocess.CalledProcessError(1, ["tempest", "--version"])
+
+    monkeypatch.setattr(regress_stack.core.utils, "run", raise_called_process_error)
+    assert regress_stack.core.utils.tempest_version() is None
+
+
+def test_tempest_version_unparseable(monkeypatch):
+    monkeypatch.setattr(
+        regress_stack.core.utils, "run", lambda *_args, **_kwargs: "tempest\n"
+    )
+    assert regress_stack.core.utils.tempest_version() is None
+
+
+def test_parse_tempest_version_accepts_missing_patch():
+    assert regress_stack.core.utils._parse_tempest_version("tempest 42.1\n") == (
+        42,
+        1,
+        0,
+    )

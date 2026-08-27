@@ -1,6 +1,10 @@
 Tests:
  openstack,
 Depends:
+ barbican-api,
+ barbican-keystone-listener,
+ barbican-tempest-plugin,
+ barbican-worker,
  ceph-mgr,
  ceph-mon,
  ceph-osd,
@@ -33,6 +37,10 @@ Restrictions:
 
 Test-Command: /bin/true
 Depends:
+ barbican-api,
+ barbican-keystone-listener,
+ barbican-tempest-plugin,
+ barbican-worker,
  ceph-mgr,
  ceph-mon,
  ceph-osd,
